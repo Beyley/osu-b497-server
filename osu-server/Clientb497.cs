@@ -34,7 +34,6 @@ public class Clientb497 {
 			
 			client.SendLoginResponse(Client.LoginResult.OK);
 			client.SendProtocolNegotiation();
-			client.SendClientUpdate(ref client, Enums.Completeness.Full);
 			client.StartBackgroundThread();
 
 			client.OnLoginComplete();
@@ -52,14 +51,24 @@ public class Clientb497 {
 					
 					break;
 				}
+				case Enums.PacketId.Osu_RequestStatusUpdate: {
+					for (var i = 0; i < ConnectedClients.CLIENTS.Length; i++) {
+						ref Client clientToNotify = ref ConnectedClients.CLIENTS[i];
+
+						if (clientToNotify.LoggedIn) {
+							client.SendClientUpdate(ref clientToNotify, Enums.Completeness.Full);
+						}
+					}
+					
+					break;
+				}
 			}
 		}
 	}
 
 	public static void SendPing(ref Client client) {
 		Logger.Log($"Sending Ping!");
-		if(client.Stream.Socket.Connected)
-			client.SendBlankPacket(Enums.PacketId.Bancho_Ping);
+		client.SendBlankPacket(Enums.PacketId.Bancho_Ping);
 	}
 
 	public static void OnDisconnect(ref Client client) {

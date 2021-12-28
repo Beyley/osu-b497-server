@@ -197,13 +197,6 @@ public struct Client {
 	}
 
 	public void OnLoginComplete() {
-		for (var i = 0; i < ConnectedClients.CLIENTS.Length; i++) {
-			ref Client clientToNotify = ref ConnectedClients.CLIENTS[i];
-
-			if (clientToNotify.LoggedIn && clientToNotify.UserId != this.UserId) {
-				clientToNotify.SendClientUpdate(ref this, Enums.Completeness.Full);
-				this.SendClientUpdate(ref clientToNotify, Enums.Completeness.Full);
-			}
-		}
+		
 	}
 }
