@@ -19,6 +19,11 @@ Thread b497Thread = new(() => {
 	while (b497Status.Started) {
 		TcpClient tcpClient = b497Status.Listener.AcceptTcpClient();
 
+		tcpClient.NoDelay             = true;
+		tcpClient.SendTimeout         = 4000;
+		tcpClient.ReceiveTimeout      = 8000;
+		tcpClient.LingerState.Enabled = false;
+		
 		new Thread(() => {
 			int i = ConnectedClients.GetNextOpenId();
 			ConnectedClients.CLIENTS[i] = new(tcpClient, Enums.ServerType.b497, b497Status);
@@ -35,11 +40,13 @@ Thread b497Thread = new(() => {
 			byte[] readBuffer = new byte[4096];
 			//Read While Connected
 			while (tcpClient.Connected && client.Stream.Socket.Connected) {
+				Console.WriteLine(tcpClient.Available);
 				if (tcpClient.Available != 0 && client.Stream.DataAvailable && client.Stream.CanRead) {
-					int bytesRecieved = client.Stream.Read(readBuffer, 0, 4096);
+					int bytesRecieved = client.Stream.Read(readBuffer, 0, readBuffer.Length);
 					//Cut Buffer
 					byte[] destinationBuffer = new byte[bytesRecieved];
 					Buffer.BlockCopy(readBuffer, 0, destinationBuffer, 0, bytesRecieved);
+					// Console.WriteLine($"{destinationBuffer[0]} {destinationBuffer[1]}");
 					//Invoke Method
 					client.HandleMessage(destinationBuffer);
 				}
