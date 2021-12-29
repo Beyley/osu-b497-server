@@ -4,7 +4,7 @@ using Kettu;
 using osu_server;
 
 internal class Program {
-	public static ServerStatus b497Status = new ServerSettingsb497();
+	public static ServerStatus B497Status = new ServerSettingsb497();
 
 	public static void Main(string[] args) {
 		Logger.AddLogger(new ConsoleLogger());
@@ -14,7 +14,7 @@ internal class Program {
 
 
 		Thread b497Thread = new(() => {
-			TcpServer server = new(ip.ToString(), b497Status.Port, typeof(Clientb497));
+			TcpServer server = new(ip.ToString(), B497Status.Port, typeof(Clientb497));
 
 			server.Start();
 		});
@@ -23,7 +23,7 @@ internal class Program {
 		b497Thread.Start();
 		Logger.Log("Press enter to stop the server!");
 		Console.ReadLine();
-		b497Status.Started = false;
-		b497Status.Listener.Stop();
+		B497Status.Started = false;
+		B497Status.Listener.Stop();
 	}
 }

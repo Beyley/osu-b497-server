@@ -1,18 +1,19 @@
 using System.Diagnostics;
+using EeveeTools.Helpers;
 using EeveeTools.Servers.TCP;
 
 namespace osu_server;
 
 public abstract class Client : TcpClientHandler {
 	public enum LoginResult {
-		OK,
+		Ok,
 		BadPassword,
 		WrongVersion
 	}
 
 	private Thread _backgroundThread;
 
-	protected object _lock          = new();
+	protected object Lock          = new();
 	public    float  Accuracy       = -1f;
 	public    string AvatarFilename = "";
 
@@ -20,9 +21,12 @@ public abstract class Client : TcpClientHandler {
 
 	public bool DisplayCity;
 
-	public List<Client> Friends = new();
+	public List<Client> Friends    = new();
+	public List<Client> Spectators = new();
 
-	public long              LastPing = Stopwatch.GetTimestamp();
+	public Client? SpectatorHost = null;
+
+	public long              LastPing = UnixTime.Now();
 	public int               Level    = -1;
 	public string            Location = "";
 	public bool              LoggedIn;
@@ -41,6 +45,8 @@ public abstract class Client : TcpClientHandler {
 	public int              UserId = 0;
 
 	public string Username = "";
+
+	public Queue<ReplayFrameBundle> ReplayFrameQueue = new();
 
 	protected void OnLoginSuccess() {
 		lock (Global.ConnectedClients) {
@@ -89,9 +95,14 @@ public abstract class Client : TcpClientHandler {
 	public abstract void SendMessage(BanchoMessage      message);
 	public abstract void SendPermissions();
 	public abstract void SendFriendsList();
-	public abstract void MakeChannelAvailable(Channel          channel);
-	public abstract void RevokeChannel(Channel                 channel);
-	public abstract void ShowChannelJoinSuccess(Channel        channel);
-	public abstract void SendBeatmapInfoReply(BeatmapInfoReply reply);
-	public abstract void Announce(string message);
+	public abstract void MakeChannelAvailable(Channel           channel);
+	public abstract void RevokeChannel(Channel                  channel);
+	public abstract void ShowChannelJoinSuccess(Channel         channel);
+	public abstract void SendBeatmapInfoReply(BeatmapInfoReply  reply);
+	public abstract void Announce(string                        message);
+	public abstract void NotifyHostAboutNewSpectator(Client     client);
+	public abstract void NotifyHostAboutSpectatorLeave(Client   client);
+	public abstract void NotifyAboutFellowSpectatorJoin(Client  client);
+	public abstract void NotifyAboutFellowSpectatorLeave(Client client);
+	public abstract void SendSpectatorFrames(ReplayFrameBundle  bundle);
 }

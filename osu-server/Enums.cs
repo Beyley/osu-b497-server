@@ -224,7 +224,7 @@ public class Enums {
 	public enum Permissions : byte {
 		None       = 0,
 		Normal     = 1,
-		BAT        = 2,
+		Bat        = 2,
 		Subscriber = 4
 	}
 
@@ -257,8 +257,8 @@ public class Enums {
 	}
 	
 	public enum Rankings {
-		XH,
-		SH,
+		Xh,
+		Sh,
 		X,
 		S,
 		A,
