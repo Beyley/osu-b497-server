@@ -3,6 +3,12 @@ using System.Diagnostics.CodeAnalysis;
 namespace osu_server;
 
 public class Enums {
+	public enum Completeness : byte {
+		StatusOnly,
+		Statistics,
+		Full
+	}
+
 	[Flags]
 	public enum Mods {
 		None        = 0,
@@ -22,7 +28,7 @@ public class Enums {
 	}
 
 	[SuppressMessage("ReSharper", "InconsistentNaming")]
-	[SuppressMessage("ReSharper", "UnusedMember.Global")]
+	// [SuppressMessage("ReSharper", "UnusedMember.Global")]
 	public enum PacketId : byte {
 		/// <summary>
 		///     osu! wishes to inform bancho about its current state.
@@ -247,11 +253,5 @@ public class Enums {
 		Lobby,
 		Multiplaying,
 		OsuDirect
-	}
-	
-	public enum Completeness : byte {
-		StatusOnly,
-		Statistics,
-		Full
 	}
 }

@@ -1,4 +1,4 @@
-namespace osu_server; 
+namespace osu_server;
 
 public abstract class Serializable {
 	public abstract void WriteToStream(Stream  s);

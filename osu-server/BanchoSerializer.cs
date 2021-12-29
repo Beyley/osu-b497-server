@@ -11,6 +11,17 @@ public class BanchoReader : BinaryReader {
 			? base.ReadString()
 			: null;
 	}
+
+	public List<int> ReadIntList() {
+		List<int> list = new();
+
+		int count = this.ReadInt32();
+
+		for (int i = 0; i < count; i++)
+			list.Add(this.ReadInt32());
+
+		return list;
+	}
 }
 
 public class BanchoWriter : BinaryWriter {
@@ -24,5 +35,11 @@ public class BanchoWriter : BinaryWriter {
 
 		this.Write((byte)11);
 		base.Write(value);
+	}
+
+	public void Write(List<int> list) {
+		this.Write(list.Count);
+		foreach (int i in list)
+			this.Write(i);
 	}
 }

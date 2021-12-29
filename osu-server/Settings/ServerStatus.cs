@@ -8,5 +8,5 @@ public abstract class ServerStatus {
 	public          bool  Started = false;
 	public abstract short Port            { get; }
 	public abstract int   ProtocolVersion { get; }
-	public abstract byte PingInterval    { get; }
+	public abstract byte  PingInterval    { get; }
 }

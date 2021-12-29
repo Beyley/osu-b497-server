@@ -5,7 +5,7 @@ using osu_server;
 
 internal class Program {
 	public static ServerStatus b497Status = new ServerSettingsb497();
-	
+
 	public static void Main(string[] args) {
 		Logger.AddLogger(new ConsoleLogger());
 		Logger.StartLogging();
