@@ -367,4 +367,13 @@ public class Clientb497 : Client {
 
 		this.SendPacket(Enums.PacketId.Bancho_BeatmapInfoReply, stream.ToArray());
 	}
+	public override void Announce(string message) {
+		using MemoryStream stream = new();
+		using BanchoWriter writer = new(stream);
+
+		writer.Write(message);
+		writer.Flush();
+
+		this.SendPacket(Enums.PacketId.Bancho_Announce, stream.ToArray());
+	}
 }

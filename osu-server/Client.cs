@@ -93,4 +93,5 @@ public abstract class Client : TcpClientHandler {
 	public abstract void RevokeChannel(Channel                 channel);
 	public abstract void ShowChannelJoinSuccess(Channel        channel);
 	public abstract void SendBeatmapInfoReply(BeatmapInfoReply reply);
+	public abstract void Announce(string message);
 }
