@@ -1,7 +1,9 @@
 using System.IO.Compression;
 using System.Text;
 using EeveeTools.Helpers;
+using ICSharpCode.SharpZipLib.GZip;
 using Kettu;
+using Lzma.Streams;
 
 namespace osu_server;
 
@@ -71,10 +73,7 @@ public class Clientb497 : Client {
 
 			Stream payload;
 
-			if (compression)
-				payload = new GZipStream(rawPayload, CompressionMode.Decompress);
-			else
-				payload = rawPayload;
+			payload = compression ? new GZipStream(rawPayload, CompressionMode.Decompress) : rawPayload;
 
 			BanchoReader reader = new(payload);
 
@@ -232,9 +231,19 @@ public class Clientb497 : Client {
 				Logger.Log("Stopping pong thread");
 				return;
 			}
+			
+			long currentTime   = UnixTime.Now();
+			long timeSincePing = currentTime - this.LastPing;
 
-			long currentTime = UnixTime.Now();
-			if (currentTime - this.LastPing > this.ServerSettings.PingInterval) {
+			if (timeSincePing > this.ServerSettings.TimeBeforeDisconnect) {
+				this.Client.Close();
+				
+				Thread.Sleep(100);
+
+				continue;
+			}
+
+			if (timeSincePing > this.ServerSettings.PingInterval) {
 				this.SendPing();
 				this.LastPing = currentTime;
 			}
@@ -329,10 +338,24 @@ public class Clientb497 : Client {
 			using MemoryStream stream = new();
 			using BanchoWriter writer = new(stream);
 
+			bool compression = false;
+			// if (data.Length > 150) {
+			// 	compression = true;
+			// 	
+			// 	MemoryStream writeBuffer = new();
+			// 	GZipOutputStream comp = new(writeBuffer);
+			// 	comp.WriteBytes(data);
+			// 	comp.Close();
+			//
+			// 	Logger.Log($"Sending compressed packet {pid} original:{data.Length} new:{writeBuffer.Length}");
+			// 	
+			// 	data = writeBuffer.ToArray();
+			// }
+
 			writer.Write((short)pid);        // Packet ID
-			writer.Write(false);             // Compression
+			writer.Write(compression);       // Compression
 			writer.Write((uint)data.Length); // Packet length
-			writer.Write(data.ToArray());    //Write the data
+			writer.Write(data.ToArray());    // Write the data
 			writer.Flush();
 
 			this.SendData(stream.ToArray());

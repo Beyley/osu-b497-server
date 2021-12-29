@@ -73,15 +73,13 @@ public abstract class Client : TcpClientHandler {
 	protected override void HandleDisconnect() {
 		lock (Global.ConnectedClients) {
 			Global.ConnectedClients.Remove(this);
+			
+			Global.ConnectedClients.ForEach(x => x.SendUserDisconnect(this));
 		}
-
+		
 		this.LoggedIn            = false;
 		this.Connected           = false;
 		this.RunBackgroundThread = false;
-
-		lock (Global.ConnectedClients) {
-			Global.ConnectedClients.ForEach(x => x.SendUserDisconnect(this));
-		}
 
 		if (this.SpectatorHost != null) {
 			foreach (Client spectator in this.SpectatorHost.Spectators.Where(spectator => spectator != this))

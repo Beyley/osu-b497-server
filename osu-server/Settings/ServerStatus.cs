@@ -9,4 +9,5 @@ public abstract class ServerStatus {
 	public abstract short Port            { get; }
 	public abstract int   ProtocolVersion { get; }
 	public abstract byte  PingInterval    { get; }
+	public abstract byte  TimeBeforeDisconnect    { get; }
 }
