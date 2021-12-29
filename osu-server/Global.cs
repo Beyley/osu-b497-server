@@ -6,8 +6,8 @@ public class Global {
 	public static int UserId = 0;
 
 	public static List<Channel> ChatChannels = new() {
-		new("#osu", true), 
-		new("#taiko", false), 
+		new("#osu", true),
+		new("#taiko", false),
 		new("#cbt", false)
 	};
 }

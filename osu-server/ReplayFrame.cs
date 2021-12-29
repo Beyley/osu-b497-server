@@ -1,8 +1,7 @@
-namespace osu_server; 
+namespace osu_server;
 
 [Flags]
-public enum ButtonState
-{
+public enum ButtonState {
 	None   = 0,
 	Left1  = 1,
 	Right1 = 2,
@@ -11,21 +10,21 @@ public enum ButtonState
 }
 
 public class ReplayFrame : Serializable {
-	public          float       MouseX;
-	public          float       MouseY;
-	public          bool        MouseLeft;
-	public          bool        MouseRight;
-	public          bool        MouseLeft1;
-	public          bool        MouseRight1;
-	public          bool        MouseLeft2;
-	public          bool        MouseRight2;
-	public          ButtonState ButtonState;
-	public          int         Time;
+	public ButtonState ButtonState;
+	public bool        MouseLeft;
+	public bool        MouseLeft1;
+	public bool        MouseLeft2;
+	public bool        MouseRight;
+	public bool        MouseRight1;
+	public bool        MouseRight2;
+	public float       MouseX;
+	public float       MouseY;
+	public int         Time;
 
 	public ReplayFrame(Stream s) {
 		this.ReadFromStream(s);
 	}
-	
+
 	public override void WriteToStream(Stream s) {
 		BanchoWriter writer = new(s);
 		writer.Write((byte)this.ButtonState);
@@ -39,7 +38,7 @@ public class ReplayFrame : Serializable {
 
 		this.ButtonState = (ButtonState)reader.ReadByte();
 		this.SetButtonStates(this.ButtonState);
-            
+
 		byte bt = reader.ReadByte();
 		if (bt > 0)
 			this.SetButtonStates(ButtonState.Right1);
@@ -48,7 +47,7 @@ public class ReplayFrame : Serializable {
 		this.MouseY = reader.ReadSingle();
 		this.Time   = reader.ReadInt32();
 	}
-	
+
 	private void SetButtonStates(ButtonState buttonState) {
 		this.MouseLeft   |= (buttonState & (ButtonState.Left1 | ButtonState.Left2))   > 0;
 		this.MouseLeft1  |= (buttonState & ButtonState.Left1)                         > 0;

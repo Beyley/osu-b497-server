@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using EeveeTools.Helpers;
 using EeveeTools.Servers.TCP;
 
@@ -12,41 +11,41 @@ public abstract class Client : TcpClientHandler {
 	}
 
 	private Thread _backgroundThread;
-
-	protected object Lock          = new();
-	public    float  Accuracy       = -1f;
-	public    string AvatarFilename = "";
+	public  float  Accuracy       = -1f;
+	public  string AvatarFilename = "";
 
 	public bool Connected;
 
 	public bool DisplayCity;
 
-	public List<Client> Friends    = new();
-	public List<Client> Spectators = new();
+	public List<Client> Friends = new();
 
-	public Client? SpectatorHost = null;
+	public long   LastPing = UnixTime.Now();
+	public int    Level    = -1;
+	public string Location = "";
 
-	public long              LastPing = UnixTime.Now();
-	public int               Level    = -1;
-	public string            Location = "";
-	public bool              LoggedIn;
-	public Enums.Permissions Permission          = Enums.Permissions.Normal;
-	public int               PlayCount           = -1;
-	public ushort            Rank                = 0;
-	public long              RankedScore         = -1;
-	public bool              RunBackgroundThread = true;
+	protected object            Lock = new();
+	public    bool              LoggedIn;
+	public    Enums.Permissions Permission  = Enums.Permissions.Normal;
+	public    int               PlayCount   = -1;
+	public    ushort            Rank        = 0;
+	public    long              RankedScore = -1;
+
+	public Queue<ReplayFrameBundle> ReplayFrameQueue    = new();
+	public bool                     RunBackgroundThread = true;
 
 	public ServerStatus ServerSettings;
-	public ClientStatus Status     = new();
-	public int          TimeZone   = 0;
-	public long         TotalScore = -1;
+
+	public Client?      SpectatorHost = null;
+	public List<Client> Spectators    = new();
+	public ClientStatus Status        = new();
+	public int          TimeZone      = 0;
+	public long         TotalScore    = -1;
 
 	public Enums.ServerType Type;
 	public int              UserId = 0;
 
 	public string Username = "";
-
-	public Queue<ReplayFrameBundle> ReplayFrameQueue = new();
 
 	protected void OnLoginSuccess() {
 		lock (Global.ConnectedClients) {
@@ -85,9 +84,8 @@ public abstract class Client : TcpClientHandler {
 		}
 
 		if (this.SpectatorHost != null) {
-			foreach (Client spectator in this.SpectatorHost.Spectators.Where(spectator => spectator != this)) {
+			foreach (Client spectator in this.SpectatorHost.Spectators.Where(spectator => spectator != this))
 				spectator.NotifyAboutFellowSpectatorLeave(this);
-			}
 
 			this.SpectatorHost.NotifyHostAboutSpectatorLeave(this);
 		}

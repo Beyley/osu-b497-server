@@ -186,7 +186,7 @@ public class Enums {
 		Osu_MatchChangeSettings,
 		Bancho_FellowSpectatorJoined,
 		Bancho_FellowSpectatorLeft,
-		Osu_MatchStart, 
+		Osu_MatchStart,
 		AllPlayersLoaded,
 		Bancho_MatchStart,
 		Osu_MatchScoreUpdate,
@@ -234,6 +234,19 @@ public class Enums {
 		CatchTheBeat = 2
 	}
 
+	public enum Rankings {
+		Xh,
+		Sh,
+		X,
+		S,
+		A,
+		B,
+		C,
+		D,
+		F,
+		None
+	}
+
 	[SuppressMessage("ReSharper", "InconsistentNaming")]
 	public enum ServerType : byte {
 		b497
@@ -254,18 +267,5 @@ public class Enums {
 		Lobby,
 		Multiplaying,
 		OsuDirect
-	}
-	
-	public enum Rankings {
-		Xh,
-		Sh,
-		X,
-		S,
-		A,
-		B,
-		C,
-		D,
-		F,
-		None
 	}
 }

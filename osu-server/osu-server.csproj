@@ -17,9 +17,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="EeveeTools" Version="1.0.0" />
-        <PackageReference Include="Kettu" Version="1.2.1" />
-        <PackageReference Include="LzmaStream" Version="0.9.1-beta" />
+        <PackageReference Include="EeveeTools" Version="1.0.0"/>
+        <PackageReference Include="Kettu" Version="1.2.1"/>
+        <PackageReference Include="LzmaStream" Version="0.9.1-beta"/>
     </ItemGroup>
 
 </Project>

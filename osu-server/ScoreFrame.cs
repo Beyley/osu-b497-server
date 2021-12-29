@@ -1,8 +1,6 @@
-namespace osu_server; 
+namespace osu_server;
 
 public class ScoreFrame : Serializable {
-	public byte   Id;
-	public int    Time;
 	public ushort Count100;
 	public ushort Count300;
 	public ushort Count50;
@@ -10,19 +8,21 @@ public class ScoreFrame : Serializable {
 	public ushort CountKatu;
 	public ushort CountMiss;
 	public ushort CurrentCombo;
-	public ushort MaxCombo;
 	public int    CurrentHp;
+	public byte   Id;
+	public ushort MaxCombo;
 	public bool   Pass;
 	public bool   Perfect;
+	public int    Time;
 	public int    TotalScore;
-	
+
 	public ScoreFrame(Stream s) {
 		this.ReadFromStream(s);
 	}
-	
+
 	public override void WriteToStream(Stream s) {
 		BanchoWriter writer = new(s);
-		
+
 		writer.Write(this.Time);
 		writer.Write(this.Id);
 		writer.Write(this.Count300);
@@ -53,12 +53,12 @@ public class ScoreFrame : Serializable {
 		this.CurrentCombo = reader.ReadUInt16();
 		this.Perfect      = reader.ReadBoolean();
 		this.CurrentHp    = reader.ReadByte();
-		if (this.CurrentHp == 254)
-		{
+		if (this.CurrentHp == 254) {
 			this.CurrentHp = 0;
-			this.Pass         = false;
+			this.Pass      = false;
 		}
-		else
+		else {
 			this.Pass = true;
+		}
 	}
 }

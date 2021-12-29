@@ -12,7 +12,7 @@ public class ClientStatus : Serializable {
 		BanchoWriter writer = new(s);
 
 		bool beatmapUpdate = true;
-		
+
 		writer.Write((byte)this.Status);
 		writer.Write(beatmapUpdate);
 
@@ -35,7 +35,7 @@ public class ClientStatus : Serializable {
 
 		if (!beatmapUpdate)
 			return;
-		
+
 		this.StatusText      = reader.ReadString();
 		this.BeatmapChecksum = reader.ReadString();
 		this.CurrentMods     = (Enums.Mods)reader.ReadUInt16();

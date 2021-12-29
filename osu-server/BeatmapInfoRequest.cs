@@ -1,4 +1,4 @@
-namespace osu_server; 
+namespace osu_server;
 
 public class BeatmapInfoRequest : Serializable {
 	public List<string> Filenames;
@@ -13,16 +13,16 @@ public class BeatmapInfoRequest : Serializable {
 		this.Filenames = new();
 		this.Ids       = new();
 	}
-	
+
 	public override void WriteToStream(Stream s) {
 		BanchoWriter writer = new(s);
-		
+
 		writer.Write(this.Filenames);
 		writer.Write(this.Ids);
-		
+
 		writer.Flush();
 	}
-	
+
 	public override void ReadFromStream(Stream s) {
 		BanchoReader reader = new(s);
 

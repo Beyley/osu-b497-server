@@ -24,7 +24,7 @@ public class BanchoReader : BinaryReader {
 
 		return list;
 	}
-	
+
 	[Pure]
 	public List<string> ReadStringList() {
 		List<string> list = new();
@@ -56,7 +56,7 @@ public class BanchoWriter : BinaryWriter {
 		foreach (int i in list)
 			this.Write(i);
 	}
-	
+
 	public void Write(List<string> list) {
 		this.Write(list.Count);
 		foreach (string i in list)

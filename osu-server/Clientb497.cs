@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.IO.Compression;
 using System.Text;
 using EeveeTools.Helpers;
@@ -49,20 +48,21 @@ public class Clientb497 : Client {
 
 			this.SendPermissions();
 			this.SendFriendsList();
-			
+
 			Global.ChatChannels.ForEach(this.MakeChannelAvailable);
 
 			this.ShowChannelJoinSuccess(Global.ChatChannels.First(x => x.Name == "#osu"));
-			
+
 			this.OnLoginSuccess();
 		}
 		else {
 			MemoryStream rawStream = new(data);
 			BanchoReader rawReader = new(rawStream);
 
-			Enums.PacketId pid         = (Enums.PacketId)rawReader.ReadInt16();
-			bool           compression = rawReader.ReadBoolean();
-			uint           length      = rawReader.ReadUInt32();
+			Enums.PacketId pid = (Enums.PacketId)rawReader.ReadInt16();
+
+			bool compression = rawReader.ReadBoolean();
+			uint length      = rawReader.ReadUInt32();
 
 			MemoryStream rawPayload = new(rawReader.ReadBytes((int)length));
 
@@ -78,7 +78,7 @@ public class Clientb497 : Client {
 
 			BanchoReader reader = new(payload);
 
-			if(pid != Enums.PacketId.Osu_Pong)
+			if (pid != Enums.PacketId.Osu_Pong)
 				Logger.Log($"Received packet {pid}!");
 
 			switch (pid) {
@@ -110,34 +110,34 @@ public class Clientb497 : Client {
 				}
 				case Enums.PacketId.Osu_ChannelJoin: {
 					string channel = reader.ReadString();
-					
+
 					this.ShowChannelJoinSuccess(Global.ChatChannels.First(x => x.Name == channel));
-					
+
 					break;
 				}
 				case Enums.PacketId.Osu_FriendAdd: {
 					int userid = reader.ReadInt32();
-					
+
 					this.Friends.Add(Global.ConnectedClients.First(x => x.UserId == userid));
-					
+
 					break;
 				}
 				case Enums.PacketId.Osu_FriendRemove: {
 					int userid = reader.ReadInt32();
-					
+
 					this.Friends.Remove(Global.ConnectedClients.First(x => x.UserId == userid));
-					
+
 					break;
 				}
 				case Enums.PacketId.Osu_SendUserStatus: {
 					this.Status.ReadFromStream(payload);
-					
+
 					Logger.Log($"{this.Status.Status} {this.Status.StatusText} | mods:{this.Status.CurrentMods}");
-					
+
 					lock (Global.ConnectedClients) {
 						Global.ConnectedClients.ForEach(x => x.SendClientUpdate(this, Enums.Completeness.StatusOnly));
 					}
-					
+
 					break;
 				}
 				case Enums.PacketId.Osu_SendIrcMessagePrivate: {
@@ -150,13 +150,11 @@ public class Clientb497 : Client {
 
 					Client target = Global.ConnectedClients.FirstOrDefault(x => x.Username == message.Target, null);
 
-					if (target == null) {
+					if (target == null)
 						this.SendMessage(new BanchoMessage("BanchoBot", "That user does not seem to exist", this.Username));
-					}
-					else {
+					else
 						target.SendMessage(message);
-					}
-					
+
 					break;
 				}
 				case Enums.PacketId.Osu_BeatmapInfoRequest: {
@@ -165,18 +163,17 @@ public class Clientb497 : Client {
 
 					BeatmapInfoReply reply = new();
 					reply.BeatmapInfoList = new();
-					
-					foreach (int requestId in request.Ids) {
+
+					foreach (int requestId in request.Ids)
 						reply.BeatmapInfoList.Add(new() {
-							BeatmapId = requestId, 
-							BeatmapSetId = 0, 
-							Checksum = "", 
-							Id = requestId, 
-							PlayerRank = Enums.Rankings.None, 
-							Ranked = 1, 
-							ThreadId = 0
+							BeatmapId    = requestId,
+							BeatmapSetId = 0,
+							Checksum     = "",
+							Id           = requestId,
+							PlayerRank   = Enums.Rankings.None,
+							Ranked       = 1,
+							ThreadId     = 0
 						});
-					}
 
 					this.SendBeatmapInfoReply(reply);
 
@@ -192,44 +189,43 @@ public class Clientb497 : Client {
 					}
 					else {
 						this.SpectatorHost = host;
-						
-						foreach (Client spectator in this.SpectatorHost.Spectators) {
+
+						foreach (Client spectator in this.SpectatorHost.Spectators)
 							this.NotifyAboutFellowSpectatorJoin(spectator);
-						}
-						
+
 						this.SpectatorHost.NotifyHostAboutNewSpectator(this);
 					}
-					
+
 					break;
 				}
 				case Enums.PacketId.Osu_StopSpectating: {
 					if (this.SpectatorHost != null) {
 						this.SpectatorHost.NotifyHostAboutSpectatorLeave(this);
 
-						foreach (Client spectator in this.SpectatorHost.Spectators) {
+						foreach (Client spectator in this.SpectatorHost.Spectators)
 							spectator.NotifyAboutFellowSpectatorLeave(this);
-						}
-						
+
 						this.SpectatorHost = null;
-					} else
+					}
+					else {
 						this.Announce("You are not spectating anyone!");
-					
+					}
+
 					break;
 				}
 				case Enums.PacketId.Osu_SpectateFrames: {
 					ReplayFrameBundle bundle = new();
 					bundle.ReadFromStream(payload);
-					
-					foreach (Client spectator in this.Spectators) {
+
+					foreach (Client spectator in this.Spectators)
 						spectator.ReplayFrameQueue.Enqueue(bundle);
-					}
-					
+
 					break;
 				}
 			}
 		}
 	}
-	
+
 	protected override void BackgroundThreadMain() {
 		for (;;) {
 			if (!this.RunBackgroundThread) {
@@ -242,8 +238,8 @@ public class Clientb497 : Client {
 				this.SendPing();
 				this.LastPing = currentTime;
 			}
-			
-			if(this.ReplayFrameQueue.TryDequeue(out ReplayFrameBundle bundle))
+
+			if (this.ReplayFrameQueue.TryDequeue(out ReplayFrameBundle bundle))
 				this.SendSpectatorFrames(bundle);
 
 			Thread.Sleep(50);
@@ -340,7 +336,7 @@ public class Clientb497 : Client {
 			writer.Flush();
 
 			this.SendData(stream.ToArray());
-			
+
 			this.LastPing = UnixTime.Now();
 		}
 	}
@@ -414,7 +410,7 @@ public class Clientb497 : Client {
 	}
 	public override void SendBeatmapInfoReply(BeatmapInfoReply reply) {
 		using MemoryStream stream = new();
-		
+
 		reply.WriteToStream(stream);
 
 		this.SendPacket(Enums.PacketId.Bancho_BeatmapInfoReply, stream.ToArray());
@@ -434,7 +430,7 @@ public class Clientb497 : Client {
 
 		writer.Write(client.UserId);
 		writer.Flush();
-		
+
 		this.SendPacket(Enums.PacketId.Bancho_SpectatorJoined, stream.ToArray());
 
 		this.Spectators.Add(client);
@@ -447,7 +443,7 @@ public class Clientb497 : Client {
 		writer.Flush();
 
 		this.SendPacket(Enums.PacketId.Bancho_SpectatorLeft, stream.ToArray());
-		
+
 		this.Spectators.Remove(client);
 	}
 	public override void NotifyAboutFellowSpectatorJoin(Client client) {
@@ -470,7 +466,7 @@ public class Clientb497 : Client {
 	}
 	public override void SendSpectatorFrames(ReplayFrameBundle bundle) {
 		using MemoryStream stream = new();
-		
+
 		bundle.WriteToStream(stream);
 
 		this.SendPacket(Enums.PacketId.Bancho_SpectateFrames, stream.ToArray());
