@@ -1,23 +1,12 @@
 namespace osu_server;
 
-public struct ClientStatus {
-	public string          BeatmapChecksum;
-	public int             BeatmapId;
-	public bool            BeatmapUpdate;
-	public Enums.Mods      CurrentMods;
-	public Enums.PlayModes PlayMode;
-	public Enums.Status    Status;
-	public string          StatusText;
-
-	public ClientStatus() {
-		this.BeatmapChecksum = "";
-		this.BeatmapId       = -1;
-		this.BeatmapUpdate   = false;
-		this.CurrentMods     = Enums.Mods.None;
-		this.PlayMode        = Enums.PlayModes.OsuStandard;
-		this.Status          = Enums.Status.Idle;
-		this.StatusText      = "";
-	}
+public class ClientStatus {
+	public string          BeatmapChecksum = "";
+	public int             BeatmapId       = -1;
+	public Enums.Mods      CurrentMods     = Enums.Mods.None;
+	public Enums.PlayModes PlayMode        = Enums.PlayModes.OsuStandard;
+	public Enums.Status    Status          = Enums.Status.Idle;
+	public string          StatusText      = "";
 
 	public void WriteToStream(BanchoWriter writer, bool beatmapUpdate) {
 		writer.Write((byte)this.Status);
