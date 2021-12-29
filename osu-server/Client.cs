@@ -83,6 +83,14 @@ public abstract class Client : TcpClientHandler {
 		lock (Global.ConnectedClients) {
 			Global.ConnectedClients.ForEach(x => x.SendUserDisconnect(this));
 		}
+
+		if (this.SpectatorHost != null) {
+			foreach (Client spectator in this.SpectatorHost.Spectators.Where(spectator => spectator != this)) {
+				spectator.NotifyAboutFellowSpectatorLeave(this);
+			}
+
+			this.SpectatorHost.NotifyHostAboutSpectatorLeave(this);
+		}
 	}
 
 	public abstract void SendLoginResponse(LoginResult loginResult);
