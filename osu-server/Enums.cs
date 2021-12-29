@@ -186,7 +186,8 @@ public class Enums {
 		Osu_MatchChangeSettings,
 		Bancho_FellowSpectatorJoined,
 		Bancho_FellowSpectatorLeft,
-		Osu_MatchStart, AllPlayersLoaded,
+		Osu_MatchStart, 
+		AllPlayersLoaded,
 		Bancho_MatchStart,
 		Osu_MatchScoreUpdate,
 		Bancho_MatchScoreUpdate,
@@ -253,5 +254,18 @@ public class Enums {
 		Lobby,
 		Multiplaying,
 		OsuDirect
+	}
+	
+	public enum Rankings {
+		XH,
+		SH,
+		X,
+		S,
+		A,
+		B,
+		C,
+		D,
+		F,
+		None
 	}
 }

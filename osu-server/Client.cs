@@ -89,7 +89,8 @@ public abstract class Client : TcpClientHandler {
 	public abstract void SendMessage(BanchoMessage      message);
 	public abstract void SendPermissions();
 	public abstract void SendFriendsList();
-	public abstract void MakeChannelAvailable(Channel channel);
-	public abstract void RevokeChannel(Channel        channel);
-	public abstract void ShowChannelJoinSuccess(Channel channel);
+	public abstract void MakeChannelAvailable(Channel          channel);
+	public abstract void RevokeChannel(Channel                 channel);
+	public abstract void ShowChannelJoinSuccess(Channel        channel);
+	public abstract void SendBeatmapInfoReply(BeatmapInfoReply reply);
 }

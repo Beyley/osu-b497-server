@@ -157,6 +157,29 @@ public class Clientb497 : Client {
 					
 					break;
 				}
+				case Enums.PacketId.Osu_BeatmapInfoRequest: {
+					BeatmapInfoRequest request = new();
+					request.ReadFromStream(payload);
+
+					BeatmapInfoReply reply = new();
+					reply.BeatmapInfoList = new();
+					
+					foreach (int requestId in request.Ids) {
+						reply.BeatmapInfoList.Add(new() {
+							BeatmapId = requestId, 
+							BeatmapSetId = 0, 
+							Checksum = "", 
+							Id = requestId, 
+							PlayerRank = Enums.Rankings.None, 
+							Ranked = 1, 
+							ThreadId = 0
+						});
+					}
+
+					this.SendBeatmapInfoReply(reply);
+
+					break;
+				}
 			}
 		}
 
@@ -336,5 +359,12 @@ public class Clientb497 : Client {
 		writer.Flush();
 
 		this.SendPacket(Enums.PacketId.Bancho_ChannelJoinSuccess, stream.ToArray());
+	}
+	public override void SendBeatmapInfoReply(BeatmapInfoReply reply) {
+		using MemoryStream stream = new();
+		
+		reply.WriteToStream(stream);
+
+		this.SendPacket(Enums.PacketId.Bancho_BeatmapInfoReply, stream.ToArray());
 	}
 }

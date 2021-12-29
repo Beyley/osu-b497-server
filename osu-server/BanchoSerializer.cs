@@ -1,3 +1,4 @@
+using System.Diagnostics.Contracts;
 using System.Text;
 
 namespace osu_server;
@@ -12,6 +13,7 @@ public class BanchoReader : BinaryReader {
 			: null;
 	}
 
+	[Pure]
 	public List<int> ReadIntList() {
 		List<int> list = new();
 
@@ -19,6 +21,18 @@ public class BanchoReader : BinaryReader {
 
 		for (int i = 0; i < count; i++)
 			list.Add(this.ReadInt32());
+
+		return list;
+	}
+	
+	[Pure]
+	public List<string> ReadStringList() {
+		List<string> list = new();
+
+		int count = this.ReadInt32();
+
+		for (int i = 0; i < count; i++)
+			list.Add(this.ReadString());
 
 		return list;
 	}
@@ -40,6 +54,12 @@ public class BanchoWriter : BinaryWriter {
 	public void Write(List<int> list) {
 		this.Write(list.Count);
 		foreach (int i in list)
+			this.Write(i);
+	}
+	
+	public void Write(List<string> list) {
+		this.Write(list.Count);
+		foreach (string i in list)
 			this.Write(i);
 	}
 }
