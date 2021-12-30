@@ -109,8 +109,8 @@ public abstract class Client : TcpClientHandler {
 	public abstract void SendBeatmapInfoReply(BeatmapInfoReply reply);
 	public abstract void Announce(string                       message);
 	public abstract void GetAttention();
-	public abstract void NotifyHostAboutNewSpectator(Client    client);
-	public abstract void NotifyHostAboutSpectatorFail(Client   client);
+	public abstract void NotifyHostAboutNewSpectator(Client     client);
+	public abstract void NotifyHostAboutSpectatorFail(Client    client);
 	public abstract void NotifyHostAboutSpectatorLeave(Client   client);
 	public abstract void NotifyAboutFellowSpectatorJoin(Client  client);
 	public abstract void NotifyAboutFellowSpectatorLeave(Client client);
@@ -128,4 +128,5 @@ public abstract class Client : TcpClientHandler {
 	public abstract void HandlePlayerFail(int              id);
 	public abstract void HandleMatchScoreUpdate(ScoreFrame frame);
 	public abstract void HandleMatchComplete();
+	public abstract void HandleMatchSkip();
 }

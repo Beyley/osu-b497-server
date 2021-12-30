@@ -35,6 +35,8 @@ public class Match : Serializable {
 	public          bool      IsActive;
 	internal        bool[]    PlayerLoaded = new bool[SLOT_COUNT];
 	internal        Client?[] Players      = new Client[SLOT_COUNT];
+
+	public Channel Channel;
 		
 	public Client GetHost() {
 		return Global.GetUserById(this.HostId)!;
@@ -167,15 +169,37 @@ public class Match : Serializable {
 	}
 
 	public void HandlePlayerLoadComplete(Client client) {
-		Console.WriteLine($"----- STEP1 {client.Username}");
-		
 		if (!this.InProgress) return;
-
-		Console.WriteLine($"----- STEP2 {client.Username}");
 
 		this.PlayerLoaded[this.FindPlayerFromId(client.UserId)] = true;
 		
 		this.CheckIfAllPlayersLoaded();
+	}
+
+	public bool AllPlayersSkip {
+		get {
+			for (int i = 0; i < this.Players.Length; i++) {
+				Client? player = this.Players[i];
+				
+				if(player != null)
+					if (!this.SkipRequested[i])
+						return false;
+			}
+
+			return true;
+		}
+	}
+	
+	public void HandlePlayerSkip(Client client) {
+		if (!this.InProgress) return;
+
+		this.SkipRequested[this.FindPlayerFromId(client.UserId)] = true;
+
+		if (this.AllPlayersSkip) {
+			foreach (Client? player in this.Players) {
+				player?.HandleMatchSkip();
+			}
+		}
 	}
 
 	public void CheckIfAllPlayersLoaded() {

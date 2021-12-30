@@ -10,12 +10,17 @@ public class Global {
 	public static void CreateMatch(Match match) {
 		match.MatchId  = MatchId++;
 		match.IsActive = true;
+
+		match.Channel = new Channel($"#mp-{match.MatchId}", true);
+		
+		ChatChannels.Add(match.Channel);
 		
 		Matches.Add(match);
 
 		Client host = match.GetHost();
-		if (match.HandlePlayerJoin(host))
+		if (match.HandlePlayerJoin(host)) {
 			host.JoinMatch(match);
+		}
 		else
 			host.JoinMatchFailed();
 		
@@ -30,6 +35,12 @@ public class Global {
 	public static void MatchDisband(Match match) {
 		lock(ConnectedClients)
 			ConnectedClients.ForEach(x => x.HandleMatchDisband(match));
+
+		foreach (Client client in match.Channel.JoinedClients) {
+			client.RevokeChannel(match.Channel);
+		}
+		
+		ChatChannels.Remove(match.Channel);
 
 		Matches.RemoveAll(x => x.MatchId == match.MatchId);
 	}

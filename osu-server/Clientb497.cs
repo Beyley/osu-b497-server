@@ -99,7 +99,9 @@ public class Clientb497 : Client {
 
 					Logger.Log($"<{message.Target}> {message.Sender}: {message.Message}");
 
-					Global.ConnectedClients.ForEach(x => {
+					Channel channel = Global.ChatChannels.FirstOrDefault(x => x.Name == message.Target, null);
+					
+					channel?.JoinedClients.ForEach(x => {
 						if (x.UserId != this.UserId)
 							x.SendMessage(message);
 					});
@@ -364,6 +366,11 @@ public class Clientb497 : Client {
 					
 					break;
 				}
+				case Enums.PacketId.Osu_MatchSkipRequest: {
+					this.CurrentMatch?.HandlePlayerSkip(this);
+					
+					break;
+				}
 				case Enums.PacketId.Osu_Pong: break;
 				default: {
 					Console.WriteLine($"Received unhandled packet {pid}!");
@@ -575,6 +582,8 @@ public class Clientb497 : Client {
 		using MemoryStream stream = new();
 		using BanchoWriter writer = new(stream);
 
+		channel.JoinedClients.Remove(this);
+
 		writer.Write(channel.Name);
 		writer.Flush();
 
@@ -584,6 +593,8 @@ public class Clientb497 : Client {
 		using MemoryStream stream = new();
 		using BanchoWriter writer = new(stream);
 
+		channel.JoinedClients.Add(this);
+		
 		writer.Write(channel.Name);
 		writer.Flush();
 
@@ -756,5 +767,8 @@ public class Clientb497 : Client {
 	}
 	public override void HandleMatchComplete() {
 		this.SendBlankPacket(Enums.PacketId.Bancho_MatchComplete);
+	}
+	public override void HandleMatchSkip() {
+		this.SendBlankPacket(Enums.PacketId.Bancho_MatchSkip);
 	}
 }
