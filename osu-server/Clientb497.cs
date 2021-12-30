@@ -605,6 +605,9 @@ public class Clientb497 : Client {
 
 		this.SendPacket(Enums.PacketId.Bancho_Announce, stream.ToArray());
 	}
+	public override void GetAttention() {
+		this.SendBlankPacket(Enums.PacketId.Bancho_GetAttention);
+	}
 	public override void NotifyHostAboutNewSpectator(Client client) {
 		using MemoryStream stream = new();
 		using BanchoWriter writer = new(stream);

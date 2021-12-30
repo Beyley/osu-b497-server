@@ -108,6 +108,7 @@ public abstract class Client : TcpClientHandler {
 	public abstract void ShowChannelJoinSuccess(Channel        channel);
 	public abstract void SendBeatmapInfoReply(BeatmapInfoReply reply);
 	public abstract void Announce(string                       message);
+	public abstract void GetAttention();
 	public abstract void NotifyHostAboutNewSpectator(Client    client);
 	public abstract void NotifyHostAboutSpectatorFail(Client   client);
 	public abstract void NotifyHostAboutSpectatorLeave(Client   client);
