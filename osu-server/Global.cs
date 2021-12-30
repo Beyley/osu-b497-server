@@ -13,7 +13,7 @@ public class Global {
 
 		match.Channel = new Channel($"#mp-{match.MatchId}", true);
 		
-		ChatChannels.Add(match.Channel);
+		// ChatChannels.Add(match.Channel);
 		
 		Matches.Add(match);
 
@@ -40,7 +40,7 @@ public class Global {
 			client.RevokeChannel(match.Channel);
 		}
 		
-		ChatChannels.Remove(match.Channel);
+		// ChatChannels.Remove(match.Channel);
 
 		Matches.RemoveAll(x => x.MatchId == match.MatchId);
 	}
