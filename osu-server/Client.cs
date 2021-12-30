@@ -34,13 +34,13 @@ public abstract class Client : TcpClientHandler {
 	public Queue<ReplayFrameBundle> ReplayFrameQueue    = new();
 	public bool                     RunBackgroundThread = true;
 
-	public ServerStatus ServerSettings;
-
 	public Client?      SpectatorHost = null;
 	public List<Client> Spectators    = new();
-	public ClientStatus Status        = new();
-	public int          TimeZone      = 0;
-	public long         TotalScore    = -1;
+	public Match?       CurrentMatch  = null;
+
+	public ClientStatus Status     = new();
+	public int          TimeZone   = 0;
+	public long         TotalScore = -1;
 
 	public Enums.ServerType Type;
 	public int              UserId = 0;
@@ -87,6 +87,10 @@ public abstract class Client : TcpClientHandler {
 
 			this.SpectatorHost.NotifyHostAboutSpectatorLeave(this);
 		}
+
+		if (Global.ClientsInLobby.Contains(this)) {
+			Global.ClientsInLobby.ForEach(x => x.NotifyAboutLobbyLeave(this));
+		}
 	}
 
 	public abstract void SendLoginResponse(LoginResult loginResult);
@@ -109,4 +113,17 @@ public abstract class Client : TcpClientHandler {
 	public abstract void NotifyAboutFellowSpectatorJoin(Client  client);
 	public abstract void NotifyAboutFellowSpectatorLeave(Client client);
 	public abstract void SendSpectatorFrames(ReplayFrameBundle  bundle);
+	public abstract void NotifyAboutLobbyJoin(Client            client);
+	public abstract void NotifyAboutLobbyLeave(Client           client);
+	public abstract void JoinMatch(Match                        match);
+	public abstract void LeaveMatch();
+	public abstract void JoinMatchFailed();
+	public abstract void HandleMatchUpdate(Match match);
+	public abstract void NotifyOfMatchHostTransfer();
+	public abstract void HandleMatchDisband(Match match);
+	public abstract void HandleMatchStart();
+	public abstract void HandleMatchAllPlayersLoaded();
+	public abstract void HandlePlayerFail(int              id);
+	public abstract void HandleMatchScoreUpdate(ScoreFrame frame);
+	public abstract void HandleMatchComplete();
 }

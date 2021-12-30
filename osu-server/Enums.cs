@@ -227,6 +227,11 @@ public class Enums {
 		Bat        = 2,
 		Subscriber = 4
 	}
+	
+	public enum MatchTypes : byte {
+		Standard  = 0,
+		Powerplay = 1
+	}
 
 	public enum PlayModes : byte {
 		OsuStandard  = 0,

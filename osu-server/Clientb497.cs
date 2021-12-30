@@ -13,7 +13,6 @@ public class Clientb497 : Client {
 
 	public Clientb497() {
 		this.Type           = Enums.ServerType.b497;
-		this.ServerSettings = Program.B497Status;
 	}
 
 	protected override void HandleData(byte[] data) {
@@ -77,8 +76,8 @@ public class Clientb497 : Client {
 
 			BanchoReader reader = new(payload);
 
-			if (pid != Enums.PacketId.Osu_Pong)
-				Logger.Log($"Received packet {pid}!");
+			// if (pid != Enums.PacketId.Osu_Pong)
+				// Logger.Log($"Received packet {pid}!");
 
 			switch (pid) {
 				case Enums.PacketId.Osu_Exit: {
@@ -117,14 +116,19 @@ public class Clientb497 : Client {
 				case Enums.PacketId.Osu_FriendAdd: {
 					int userid = reader.ReadInt32();
 
-					this.Friends.Add(Global.ConnectedClients.First(x => x.UserId == userid));
+					Client? c = Global.GetUserById(userid);
+					
+					if(c != null)
+						this.Friends.Add(c);
 
 					break;
 				}
 				case Enums.PacketId.Osu_FriendRemove: {
 					int userid = reader.ReadInt32();
 
-					this.Friends.Remove(Global.ConnectedClients.First(x => x.UserId == userid));
+					Client? c = Global.GetUserById(userid);
+					
+					this.Friends.Remove(c);
 
 					break;
 				}
@@ -181,7 +185,7 @@ public class Clientb497 : Client {
 				case Enums.PacketId.Osu_StartSpectating: {
 					int id = reader.ReadInt32();
 
-					Client? host = Global.ConnectedClients.FirstOrDefault(x => x.UserId == id, null);
+					Client? host = Global.GetUserById(id);
 
 					if (host == null) {
 						this.Announce("Could not find that player!");
@@ -221,9 +225,151 @@ public class Clientb497 : Client {
 
 					break;
 				}
+				case Enums.PacketId.Osu_LobbyJoin: {
+					this.LeaveMatch();
+
+					Global.ClientsInLobby.Add(this);
+					
+					Global.ClientsInLobby.ForEach(x => {
+						x.NotifyAboutLobbyJoin(this);
+						this.NotifyAboutLobbyJoin(x);
+					});
+					
+					Global.Matches.ForEach(this.HandleMatchUpdate);
+
+					break;
+				}
+				case Enums.PacketId.Osu_LobbyPart: {
+					Global.ClientsInLobby.Remove(this);
+					
+					Global.ClientsInLobby.ForEach(x => {
+						x.NotifyAboutLobbyLeave(this);
+						this.NotifyAboutLobbyLeave(x);
+					});
+					break;
+				}
+				case Enums.PacketId.Osu_MatchCreate: {
+					Match match = new();
+					
+					match.ReadFromStream(payload);
+
+					Global.CreateMatch(new Match(match.MatchType, match.PlayMode, match.GameName, match.BeatmapName,
+										 match.BeatmapChecksum, match.BeatmapId, match.ActiveMods,
+										 this.UserId));
+					
+					break;
+				}
+				case Enums.PacketId.Osu_MatchJoin: {
+					Match? match = Global.GetMatchFromId(reader.ReadInt32());
+					
+					this.LeaveMatch();
+
+					if(match != null) {
+						if (match.HandlePlayerJoin(this)) {
+							this.JoinMatch(match);
+						}
+						else
+							this.JoinMatchFailed();
+					}
+					
+					break;
+				}
+				case Enums.PacketId.Osu_MatchPart: {
+					this.LeaveMatch();
+					
+					break;
+				}
+				case Enums.PacketId.Osu_MatchChangeSlot: {
+					this.CurrentMatch?.HandleUserChangeSlot(this, reader.ReadInt32());
+					
+					break;
+				}
+				case Enums.PacketId.Osu_MatchTransferHost: {
+					if(this.CurrentMatch != null && this.CurrentMatch.GetHost().UserId == this.UserId)
+						this.CurrentMatch?.TransferHost(reader.ReadInt32());
+					
+					break;
+				}
+				case Enums.PacketId.Osu_MatchReady: {
+					this.CurrentMatch?.HandlePlayerReady(this);
+					
+					break;
+				}
+				case Enums.PacketId.Osu_MatchNotReady: {
+					this.CurrentMatch?.HandlePlayerNotReady(this);
+					
+					break;
+				}
+				case Enums.PacketId.Osu_MatchStart: {
+					if(this.CurrentMatch == null || this.CurrentMatch.GetHost() != this) break;
+					
+					this.CurrentMatch?.HandleStart();
+					
+					break;
+				}
+				case Enums.PacketId.Osu_MatchLoadComplete: {
+					Logger.Log($"LOAD: {this.Username}");
+					this.CurrentMatch?.HandlePlayerLoadComplete(this);
+					
+					break;
+				}
+				case Enums.PacketId.Osu_MatchFailed: {
+					this.CurrentMatch?.HandlePlayerFailed(this);
+					
+					break;
+				}
+				case Enums.PacketId.Osu_MatchNoBeatmap: {
+					this.CurrentMatch?.HandlePlayerNoMap(this);
+					
+					break;
+				}
+				case Enums.PacketId.Osu_MatchHasBeatmap: {
+					this.CurrentMatch?.HandlePlayerGetMap(this);
+					
+					break;
+				}
+				case Enums.PacketId.Osu_MatchLock: {
+					if(this.CurrentMatch != null && this.UserId == this.CurrentMatch.HostId)
+						this.CurrentMatch?.ToggleLock(reader.ReadInt32());
+					
+					break;
+				}
+				case Enums.PacketId.Osu_MatchChangeSettings: {
+					Match newSettings = new();
+					newSettings.ReadFromStream(payload);
+
+					if (this.CurrentMatch != null && this.UserId == this.CurrentMatch.HostId)
+						this.CurrentMatch?.ChangeSettings(newSettings);
+					
+					break;
+				}
+				case Enums.PacketId.Osu_MatchChangeMods: {
+					if (this.CurrentMatch != null && this.UserId == this.CurrentMatch.HostId)
+						this.CurrentMatch?.HandleChangeMods((Enums.Mods)reader.ReadInt32());
+					
+					break;
+				}
+				case Enums.PacketId.Osu_MatchScoreUpdate: {
+					this.CurrentMatch?.HandleUserScoreUpdate(this, new(payload));
+
+					break;
+				}
+				case Enums.PacketId.Osu_MatchComplete: {
+					this.CurrentMatch?.HandlePlayerComplete(this);
+					
+					break;
+				}
+				case Enums.PacketId.Osu_Pong: break;
+				default: {
+					Console.WriteLine($"Received unhandled packet {pid}!");
+
+					break;
+				}
 			}
 		}
 	}
+
+	private long _lastMatchCheck = 0;
 
 	protected override void BackgroundThreadMain() {
 		for (;;) {
@@ -235,7 +381,7 @@ public class Clientb497 : Client {
 			long currentTime   = UnixTime.Now();
 			long timeSincePing = currentTime - this.LastPing;
 
-			if (timeSincePing > this.ServerSettings.TimeBeforeDisconnect) {
+			if (timeSincePing > ServerSettingsb497.TimeBeforeDisconnect) {
 				this.Client.Close();
 				
 				Thread.Sleep(100);
@@ -243,9 +389,16 @@ public class Clientb497 : Client {
 				continue;
 			}
 
-			if (timeSincePing > this.ServerSettings.PingInterval) {
+			if (timeSincePing > ServerSettingsb497.PingInterval) {
 				this.SendPing();
 				this.LastPing = currentTime;
+			}
+
+			if (currentTime - this._lastMatchCheck > ServerSettingsb497.MatchCheckInterval) {
+				this.CurrentMatch?.CheckIfAllPlayersLoaded();
+				this.CurrentMatch?.CheckIfAllPlayersComplete();
+				
+				this._lastMatchCheck = currentTime;
 			}
 
 			if (this.ReplayFrameQueue.TryDequeue(out ReplayFrameBundle bundle))
@@ -297,7 +450,7 @@ public class Clientb497 : Client {
 		using MemoryStream stream = new();
 		using BanchoWriter writer = new(stream);
 
-		writer.Write(this.ServerSettings.ProtocolVersion);
+		writer.Write(ServerSettingsb497.ProtocolVersion);
 		writer.Flush();
 
 		this.SendPacket(Enums.PacketId.Bancho_ProtocolNegotiation, stream.ToArray());
@@ -493,5 +646,98 @@ public class Clientb497 : Client {
 		bundle.WriteToStream(stream);
 
 		this.SendPacket(Enums.PacketId.Bancho_SpectateFrames, stream.ToArray());
+	}
+	public override void NotifyAboutLobbyJoin(Client client) {
+		using MemoryStream stream = new();
+		using BanchoWriter writer = new(stream);
+
+		writer.Write(client.UserId);
+		writer.Flush();
+
+		this.SendPacket(Enums.PacketId.Bancho_LobbyJoin, stream.ToArray());
+	}
+	public override void NotifyAboutLobbyLeave(Client client) {
+		using MemoryStream stream = new();
+		using BanchoWriter writer = new(stream);
+
+		writer.Write(client.UserId);
+		writer.Flush();
+
+		this.SendPacket(Enums.PacketId.Bancho_LobbyPart, stream.ToArray());
+	}
+	public override void JoinMatch(Match match) {
+		using MemoryStream stream = new();
+
+		match.WriteToStream(stream);
+
+		this.CurrentMatch = match;
+
+		this.SendPacket(Enums.PacketId.Bancho_MatchJoinSuccess, stream.ToArray());
+	}
+	public override void LeaveMatch() {
+		this.CurrentMatch?.HandlePlayerLeave(this);
+
+		this.CurrentMatch = null;
+	}
+	public override void JoinMatchFailed() {
+		using MemoryStream stream = new();
+		using BanchoWriter writer = new(stream);
+
+		writer.Write(0);
+		writer.Flush();
+
+		this.SendPacket(Enums.PacketId.Bancho_MatchJoinFail, stream.ToArray());
+	}
+	public override void HandleMatchUpdate(Match match) {
+		using MemoryStream stream = new();
+
+		match.WriteToStream(stream);
+
+		this.SendPacket(Enums.PacketId.Bancho_MatchUpdate, stream.ToArray());
+	}
+	public override void NotifyOfMatchHostTransfer() {
+		this.SendBlankPacket(Enums.PacketId.Bancho_MatchTransferHost);
+	}
+	public override void HandleMatchDisband(Match match) {
+		using MemoryStream stream = new();
+		using BanchoWriter writer = new(stream);
+
+		writer.Write(match.MatchId);
+		writer.Flush();
+
+		this.SendPacket(Enums.PacketId.Bancho_MatchDisband, stream.ToArray());
+	}
+	public override void HandleMatchStart() {
+		if(this.CurrentMatch == null) return;
+		
+		using MemoryStream stream = new();
+
+		this.CurrentMatch.WriteToStream(stream);
+
+		this.SendPacket(Enums.PacketId.Bancho_MatchStart, stream.ToArray());
+	}
+	public override void HandleMatchAllPlayersLoaded() {
+		this.SendBlankPacket(Enums.PacketId.Bancho_MatchAllPlayersLoaded);
+	}
+	public override void HandlePlayerFail(int id) {
+		using MemoryStream stream = new();
+		using BanchoWriter writer = new(stream);
+
+		writer.Write(id);
+		writer.Flush();
+
+		this.SendPacket(Enums.PacketId.Bancho_MatchPlayerFailed, stream.ToArray());
+	}
+	public override void HandleMatchScoreUpdate(ScoreFrame frame) {
+		if(this.CurrentMatch == null) return;
+		
+		using MemoryStream stream = new();
+
+		frame.WriteToStream(stream);
+
+		this.SendPacket(Enums.PacketId.Bancho_MatchScoreUpdate, stream.ToArray());
+	}
+	public override void HandleMatchComplete() {
+		this.SendBlankPacket(Enums.PacketId.Bancho_MatchComplete);
 	}
 }
