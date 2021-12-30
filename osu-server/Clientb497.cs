@@ -359,6 +359,11 @@ public class Clientb497 : Client {
 					
 					break;
 				}
+				case Enums.PacketId.Osu_CantSpectate: {
+					this.SpectatorHost?.NotifyHostAboutSpectatorFail(this);
+					
+					break;
+				}
 				case Enums.PacketId.Osu_Pong: break;
 				default: {
 					Console.WriteLine($"Received unhandled packet {pid}!");
@@ -610,6 +615,15 @@ public class Clientb497 : Client {
 		this.SendPacket(Enums.PacketId.Bancho_SpectatorJoined, stream.ToArray());
 
 		this.Spectators.Add(client);
+	}
+	public override void NotifyHostAboutSpectatorFail(Client client) {
+		using MemoryStream stream = new();
+		using BanchoWriter writer = new(stream);
+
+		writer.Write(client.UserId);
+		writer.Flush();
+
+		this.SendPacket(Enums.PacketId.Bancho_SpectatorCantSpectate, stream.ToArray());
 	}
 	public override void NotifyHostAboutSpectatorLeave(Client client) {
 		using MemoryStream stream = new();
